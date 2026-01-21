@@ -44,7 +44,7 @@ let get_temp_reg ctx =
   let temp_regs = [ T0; T1; T2; T3; T4; T5; T6 ] in
   let num_temp_regs = List.length temp_regs in
   (* 首先尝试使用T寄存器 *)
-  if ctx.temp_counter < num_temp_regs * 3
+  if ctx.temp_counter < num_temp_regs * 4
   then (
     (* 在前几轮中主要使用T寄存器，允许一定程度的重用 *)
     let reg = List.nth temp_regs (ctx.temp_counter mod num_temp_regs) in
@@ -52,7 +52,7 @@ let get_temp_reg ctx =
     reg)
   else (
     (* 当T寄存器不够用时，分配一个新的S寄存器 *)
-    let available_s_regs = [ S2; S3; S4; S5; S6; S7; S8; S9; S10 ] in
+    let available_s_regs = [ S2; S3; S4; S5; S6; S7; S8; S9; S10; S11 ] in
     let rec find_unused regs =
       match regs with
       | [] ->
@@ -486,7 +486,8 @@ let calculate_frame_size (func_def : Ast.func_def) used_callee_saved ctx =
   in
   (* 16-byte alignment *)
   let aligned_space = (base_space + 15) / 16 * 16 in
-  aligned_space
+  (* 确保最小栈帧大小为16字节 *)
+  max aligned_space 16
 ;;
 
 (* 生成函数代码 *)
